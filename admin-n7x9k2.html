@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Nahian Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--black:#0A0A0A;--surface:#111;--card:#161616;--border:#242424;--text:#F2F2ED;--muted:#7A7A72;--gold:#C8A96E;--red:#ef4444;--green:#4ade80;}
+body{background:var(--black);color:var(--text);font-family:'Inter',sans-serif;font-weight:300;font-size:14px;}
+::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-thumb{background:var(--gold);}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.login-box{background:var(--card);border:1px solid var(--border);padding:48px;width:360px;}
+.login-box h1{font-family:serif;font-size:28px;font-weight:300;margin-bottom:32px;color:var(--gold);}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.field label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+.field input{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 14px;font-family:inherit;font-size:13px;outline:none;transition:border-color .2s;}
+.field input:focus{border-color:var(--gold);}
+.btn{padding:12px 24px;font-family:inherit;font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;border:none;}
+.btn-gold{background:var(--gold);color:#000;}
+.btn-gold:hover{opacity:.85;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--gold);color:var(--text);}
+.btn-danger{background:transparent;border:1px solid var(--border);color:var(--red);}
+.btn-danger:hover{border-color:var(--red);}
+.btn-sm{padding:7px 14px;font-size:11px;}
+
+/* ADMIN LAYOUT */
+.admin-wrap{display:none;min-height:100vh;}
+.admin-header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;}
+.admin-header h1{font-size:16px;font-weight:400;} .admin-header h1 span{color:var(--gold);}
+.admin-body{padding:32px;}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:32px;}
+.tab{padding:12px 24px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.tab-panel{display:none;} .tab-panel.active{display:block;}
+
+/* TABLES */
+.data-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+.data-table th{text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.data-table td{padding:14px;border-bottom:1px solid var(--border);color:var(--muted);font-size:13px;vertical-align:top;}
+.data-table td strong{color:var(--text);}
+.data-table tr:hover td{background:rgba(255,255,255,0.02);}
+.badge{display:inline-block;padding:2px 8px;font-size:10px;border-radius:2px;}
+.badge-gold{background:rgba(200,169,110,.15);color:var(--gold);}
+.badge-green{background:rgba(74,222,128,.12);color:var(--green);}
+.actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.form-grid .full{grid-column:1/-1;}
+.panel-form{background:var(--card);border:1px solid var(--border);padding:28px;margin-bottom:24px;}
+.panel-form h3{font-size:14px;font-weight:400;margin-bottom:20px;color:var(--gold);}
+.tags-input{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+.tag-item{background:var(--surface);border:1px solid var(--border);padding:4px 10px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.tag-item button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0;line-height:1;}
+.tag-item button:hover{color:var(--red);}
+textarea.input{height:100px;resize:vertical;}
+input.input,select.input,textarea.input{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 12px;font-family:inherit;font-size:13px;outline:none;transition:border-color .2s;width:100%;}
+input.input:focus,select.input:focus,textarea.input:focus{border-color:var(--gold);}
+select.input option{background:var(--card);}
+.upload-area{border:1px dashed var(--border);padding:24px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer;transition:border-color .2s;}
+.upload-area:hover{border-color:var(--gold);}
+.upload-area input{display:none;}
+.img-previews{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+.img-preview{position:relative;width:90px;height:90px;}
+.img-preview img{width:100%;height:100%;object-fit:cover;display:block;}
+.img-preview .rm{position:absolute;top:2px;right:2px;width:20px;height:20px;background:rgba(0,0,0,.7);border:none;color:#fff;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
+.notice{padding:12px 16px;font-size:13px;border-radius:2px;margin-bottom:16px;}
+.notice-ok{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);color:var(--green);}
+.notice-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.stars-input{display:flex;gap:6px;margin-top:4px;}
+.stars-input span{font-size:22px;cursor:pointer;color:var(--border);transition:color .15s;}
+.stars-input span.on{color:var(--gold);}
+.msg-read{opacity:.5;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <h1>Admin<br>Panel</h1>
+    <div class="field"><label>Password</label><input type="password" id="pwInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div id="loginErr" style="color:var(--red);font-size:12px;margin-bottom:12px;display:none;">Wrong password.</div>
+    <button class="btn btn-gold" style="width:100%" onclick="doLogin()">Login →</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="admin-wrap" id="adminWrap">
+  <div class="admin-header">
+    <h1>Portfolio <span>Admin</span></h1>
+    <button class="btn btn-outline btn-sm" onclick="doLogout()">Logout</button>
+  </div>
+  <div class="admin-body">
+    <div id="notice" style="display:none"></div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('projects')">Projects</div>
+      <div class="tab" onclick="switchTab('reviews')">Reviews</div>
+      <div class="tab" onclick="switchTab('messages')">Messages</div>
+    </div>
+
+    <!-- PROJECTS TAB -->
+    <div class="tab-panel active" id="tab-projects">
+      <div class="section-head">
+        <h2 style="font-size:16px;font-weight:400;">All Projects</h2>
+        <button class="btn btn-gold btn-sm" onclick="showAddProject()">+ Add Project</button>
+      </div>
+
+      <!-- ADD/EDIT FORM -->
+      <div class="panel-form" id="projectForm" style="display:none">
+        <h3 id="projectFormTitle">Add New Project</h3>
+        <input type="hidden" id="pfId">
+        <div class="form-grid">
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Title</label><input class="input" id="pfTitle" placeholder="Project title"></div>
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Category</label>
+            <select class="input" id="pfCat">
+              <option>Web App</option><option>Ecommerce</option><option>Branding</option><option>Marketing</option><option>Social Media</option><option>Other</option>
+            </select>
+          </div>
+          <div class="full"><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Description</label><textarea class="input" id="pfDesc" placeholder="Project description..."></textarea></div>
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Live URL</label><input class="input" id="pfUrl" placeholder="https://..."></div>
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Sort Order</label><input class="input" type="number" id="pfSort" placeholder="1" value="1"></div>
+          <div class="full">
+            <label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Tags <span style="color:var(--muted);font-size:11px;text-transform:none;letter-spacing:0">(type + Enter)</span></label>
+            <input class="input" id="pfTagInput" placeholder="e.g. Shopify" onkeydown="addTag(event)">
+            <div class="tags-input" id="pfTags"></div>
+          </div>
+          <div class="full">
+            <label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Project Images</label>
+            <div class="upload-area" onclick="document.getElementById('pfImgInput').click()">
+              <input type="file" id="pfImgInput" multiple accept="image/*" onchange="previewImgs(event)">
+              Click to upload images (multiple allowed)
+            </div>
+            <div class="img-previews" id="pfImgPreviews"></div>
+            <div id="existingImgs" style="margin-top:12px;"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" id="pfFeatured" style="accent-color:var(--gold);">
+            <label for="pfFeatured" style="font-size:13px;color:var(--muted);">Featured project</label>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button class="btn btn-gold" id="pfSaveBtn" onclick="saveProject()">Save Project</button>
+          <button class="btn btn-outline" onclick="cancelProjectForm()">Cancel</button>
+        </div>
+      </div>
+
+      <table class="data-table" id="projectsTable">
+        <thead><tr><th>Title</th><th>Category</th><th>Featured</th><th>Actions</th></tr></thead>
+        <tbody id="projectsTbody"><tr><td colspan="4" style="text-align:center;padding:32px;"><span class="spinner"></span> Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- REVIEWS TAB -->
+    <div class="tab-panel" id="tab-reviews">
+      <div class="section-head">
+        <h2 style="font-size:16px;font-weight:400;">All Reviews</h2>
+        <button class="btn btn-gold btn-sm" onclick="showAddReview()">+ Add Review</button>
+      </div>
+      <div class="panel-form" id="reviewForm" style="display:none">
+        <h3 id="reviewFormTitle">Add Review</h3>
+        <input type="hidden" id="rfId">
+        <div class="form-grid">
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Client Name</label><input class="input" id="rfName" placeholder="John Smith"></div>
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Role</label><input class="input" id="rfRole" placeholder="Business Owner"></div>
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Company</label><input class="input" id="rfCompany" placeholder="Company name"></div>
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Project</label><input class="input" id="rfProject" placeholder="El Clasico..."></div>
+          <div class="full"><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Review</label><textarea class="input" id="rfText" placeholder="Client review..."></textarea></div>
+          <div>
+            <label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Rating</label>
+            <div class="stars-input" id="starsInput">
+              <span onclick="setRating(1)">★</span><span onclick="setRating(2)">★</span><span onclick="setRating(3)">★</span><span onclick="setRating(4)">★</span><span onclick="setRating(5)">★</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" id="rfFeatured" checked style="accent-color:var(--gold);">
+            <label for="rfFeatured" style="font-size:13px;color:var(--muted);">Featured</label>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button class="btn btn-gold" onclick="saveReview()">Save Review</button>
+          <button class="btn btn-outline" onclick="document.getElementById('reviewForm').style.display='none'">Cancel</button>
+        </div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Client</th><th>Review</th><th>Rating</th><th>Project</th><th>Actions</th></tr></thead>
+        <tbody id="reviewsTbody"><tr><td colspan="5" style="text-align:center;padding:32px;"><span class="spinner"></span> Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- MESSAGES TAB -->
+    <div class="tab-panel" id="tab-messages">
+      <h2 style="font-size:16px;font-weight:400;margin-bottom:20px;">Contact Messages</h2>
+      <table class="data-table">
+        <thead><tr><th>Name</th><th>Email</th><th>Message</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="messagesTbody"><tr><td colspan="5" style="text-align:center;padding:32px;"><span class="spinner"></span> Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://jzdzvufolranxacrdypm.supabase.co';
+const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6ZHp2dWZvbHJhbnhhY3JkeXBtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTEzNjY3MywiZXhwIjoyMDk2NzEyNjczfQ.EFlkCJ7qcxIaXzQY05v1G3fRh68RYqJcBxLGjiKjluI';
+const ADMIN_PASS = 'nahian@admin2026';
+
+// AUTH
+function doLogin() {
+  if (document.getElementById('pwInput').value === ADMIN_PASS) {
+    sessionStorage.setItem('adm','1');
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('adminWrap').style.display='block';
+    loadAll();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+  }
+}
+function doLogout() { sessionStorage.removeItem('adm'); location.reload(); }
+if (sessionStorage.getItem('adm')) { document.getElementById('loginWrap').style.display='none'; document.getElementById('adminWrap').style.display='block'; loadAll(); }
+
+// API helpers
+async function sbGet(table, q='') {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${q}`, { headers:{'apikey':SERVICE_KEY,'Authorization':'Bearer '+SERVICE_KEY} });
+  return r.json();
+}
+async function sbPost(table, data) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method:'POST', headers:{'apikey':SERVICE_KEY,'Authorization':'Bearer '+SERVICE_KEY,'Content-Type':'application/json','Prefer':'return=representation'}, body:JSON.stringify(data) });
+  return r.json();
+}
+async function sbPatch(table, id, data) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method:'PATCH', headers:{'apikey':SERVICE_KEY,'Authorization':'Bearer '+SERVICE_KEY,'Content-Type':'application/json','Prefer':'return=representation'}, body:JSON.stringify(data) });
+  return r.json();
+}
+async function sbDelete(table, id) {
+  await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method:'DELETE', headers:{'apikey':SERVICE_KEY,'Authorization':'Bearer '+SERVICE_KEY} });
+}
+async function uploadImage(file) {
+  const ext = file.name.split('.').pop();
+  const name = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const r = await fetch(`${SUPABASE_URL}/storage/v1/object/portfolio-images/${name}`, { method:'POST', headers:{'apikey':SERVICE_KEY,'Authorization':'Bearer '+SERVICE_KEY,'Content-Type':file.type}, body:file });
+  if (r.ok) return `${SUPABASE_URL}/storage/v1/object/public/portfolio-images/${name}`;
+  return null;
+}
+
+function showNotice(msg, ok=true) {
+  const n = document.getElementById('notice');
+  n.className = 'notice ' + (ok ? 'notice-ok' : 'notice-err');
+  n.textContent = msg; n.style.display='block';
+  setTimeout(() => n.style.display='none', 4000);
+}
+
+// TABS
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['projects','reviews','messages'][i]===name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id==='tab-'+name));
+  if (name==='messages') loadMessages();
+}
+
+function loadAll() { loadProjects(); loadReviews(); }
+
+// ── PROJECTS ──
+let currentTags = [], newImgFiles = [], editingProjectId = null;
+
+async function loadProjects() {
+  const projects = await sbGet('projects','?order=sort_order.asc');
+  const tbody = document.getElementById('projectsTbody');
+  if (!projects.length) { tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted);">No projects yet. Add one!</td></tr>'; return; }
+  tbody.innerHTML = projects.map(p => `
+    <tr>
+      <td><strong>${p.title}</strong></td>
+      <td>${p.category}</td>
+      <td>${p.featured ? '<span class="badge badge-gold">Featured</span>' : '<span style="color:var(--muted)">—</span>'}</td>
+      <td><div class="actions">
+        <button class="btn btn-outline btn-sm" onclick="editProject('${p.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProject('${p.id}')">Delete</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function showAddProject() {
+  editingProjectId = null; currentTags = []; newImgFiles = [];
+  document.getElementById('projectFormTitle').textContent = 'Add New Project';
+  document.getElementById('pfId').value=''; document.getElementById('pfTitle').value='';
+  document.getElementById('pfDesc').value=''; document.getElementById('pfUrl').value='';
+  document.getElementById('pfSort').value='1'; document.getElementById('pfFeatured').checked=false;
+  document.getElementById('pfCat').value='Web App';
+  document.getElementById('pfTags').innerHTML=''; document.getElementById('pfImgPreviews').innerHTML='';
+  document.getElementById('existingImgs').innerHTML='';
+  document.getElementById('projectForm').style.display='block';
+  document.getElementById('projectForm').scrollIntoView({behavior:'smooth'});
+}
+
+async function editProject(id) {
+  const projects = await sbGet('projects',`?id=eq.${id}`);
+  const imgs = await sbGet('project_images',`?project_id=eq.${id}&order=sort_order.asc`);
+  const p = projects[0]; if (!p) return;
+  editingProjectId = id; currentTags = p.tags||[]; newImgFiles=[];
+  document.getElementById('projectFormTitle').textContent = 'Edit Project';
+  document.getElementById('pfId').value=p.id; document.getElementById('pfTitle').value=p.title||'';
+  document.getElementById('pfDesc').value=p.description||''; document.getElementById('pfUrl').value=p.live_url||'';
+  document.getElementById('pfSort').value=p.sort_order||1; document.getElementById('pfFeatured').checked=!!p.featured;
+  document.getElementById('pfCat').value=p.category||'Web App';
+  renderTags(); document.getElementById('pfImgPreviews').innerHTML='';
+  document.getElementById('existingImgs').innerHTML = imgs.length ? `
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:.1em;text-transform:uppercase;">Existing images</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+      ${imgs.map(i=>`<div class="img-preview"><img src="${i.image_url}"><button class="rm" onclick="deleteImg('${i.id}',this.parentNode)">✕</button></div>`).join('')}
+    </div>` : '';
+  document.getElementById('projectForm').style.display='block';
+  document.getElementById('projectForm').scrollIntoView({behavior:'smooth'});
+}
+
+async function deleteImg(id, el) { await sbDelete('project_images',id); el.remove(); }
+
+function cancelProjectForm() { document.getElementById('projectForm').style.display='none'; }
+
+function addTag(e) {
+  if (e.key!=='Enter') return; e.preventDefault();
+  const v = document.getElementById('pfTagInput').value.trim();
+  if (v && !currentTags.includes(v)) { currentTags.push(v); renderTags(); }
+  document.getElementById('pfTagInput').value='';
+}
+function removeTag(t) { currentTags=currentTags.filter(x=>x!==t); renderTags(); }
+function renderTags() {
+  document.getElementById('pfTags').innerHTML = currentTags.map(t=>
+    `<div class="tag-item">${t}<button onclick="removeTag('${t}')">×</button></div>`).join('');
+}
+
+function previewImgs(e) {
+  newImgFiles = Array.from(e.target.files);
+  document.getElementById('pfImgPreviews').innerHTML = newImgFiles.map((f,i)=>{
+    const url = URL.createObjectURL(f);
+    return `<div class="img-preview"><img src="${url}"></div>`;
+  }).join('');
+}
+
+async function saveProject() {
+  const btn = document.getElementById('pfSaveBtn');
+  btn.innerHTML='<span class="spinner"></span> Saving...'; btn.disabled=true;
+  const data = {
+    title: document.getElementById('pfTitle').value.trim(),
+    category: document.getElementById('pfCat').value,
+    description: document.getElementById('pfDesc').value.trim(),
+    live_url: document.getElementById('pfUrl').value.trim(),
+    sort_order: parseInt(document.getElementById('pfSort').value)||1,
+    featured: document.getElementById('pfFeatured').checked,
+    tags: currentTags
+  };
+  try {
+    let projectId = editingProjectId;
+    if (projectId) { await sbPatch('projects', projectId, data); }
+    else { const res = await sbPost('projects', data); projectId = res[0]?.id; }
+    // Upload new images
+    for (let i=0; i<newImgFiles.length; i++) {
+      const url = await uploadImage(newImgFiles[i]);
+      if (url) await sbPost('project_images', { project_id:projectId, image_url:url, is_cover:i===0, sort_order:i });
+    }
+    showNotice('Project saved!');
+    document.getElementById('projectForm').style.display='none';
+    loadProjects();
+  } catch(e) { showNotice('Error saving project.', false); }
+  btn.innerHTML='Save Project'; btn.disabled=false;
+}
+
+async function deleteProject(id) {
+  if (!confirm('Delete this project?')) return;
+  await sbDelete('projects', id);
+  showNotice('Project deleted.');
+  loadProjects();
+}
+
+// ── REVIEWS ──
+let currentRating = 5;
+
+function setRating(n) {
+  currentRating = n;
+  document.querySelectorAll('#starsInput span').forEach((s,i) => s.classList.toggle('on', i<n));
+}
+setRating(5);
+
+async function loadReviews() {
+  const reviews = await sbGet('reviews','?order=created_at.asc');
+  const tbody = document.getElementById('reviewsTbody');
+  if (!reviews.length) { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">No reviews yet.</td></tr>'; return; }
+  tbody.innerHTML = reviews.map(r=>`
+    <tr>
+      <td><strong>${r.client_name}</strong><br><span style="font-size:12px">${r.client_role||''}</span></td>
+      <td style="max-width:240px;font-size:12px;">${(r.review_text||'').slice(0,80)}...</td>
+      <td>${'★'.repeat(r.rating||5)}</td>
+      <td>${r.project_name||'—'}</td>
+      <td><div class="actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteReview('${r.id}')">Delete</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function showAddReview() {
+  document.getElementById('reviewFormTitle').textContent='Add Review';
+  document.getElementById('rfId').value=''; document.getElementById('rfName').value='';
+  document.getElementById('rfRole').value=''; document.getElementById('rfCompany').value='';
+  document.getElementById('rfProject').value=''; document.getElementById('rfText').value='';
+  document.getElementById('rfFeatured').checked=true; setRating(5);
+  document.getElementById('reviewForm').style.display='block';
+  document.getElementById('reviewForm').scrollIntoView({behavior:'smooth'});
+}
+
+async function saveReview() {
+  const data = {
+    client_name: document.getElementById('rfName').value.trim(),
+    client_role: document.getElementById('rfRole').value.trim(),
+    client_company: document.getElementById('rfCompany').value.trim(),
+    project_name: document.getElementById('rfProject').value.trim(),
+    review_text: document.getElementById('rfText').value.trim(),
+    rating: currentRating,
+    featured: document.getElementById('rfFeatured').checked
+  };
+  if (!data.client_name||!data.review_text) { showNotice('Name and review are required.', false); return; }
+  await sbPost('reviews', data);
+  showNotice('Review added!');
+  document.getElementById('reviewForm').style.display='none';
+  loadReviews();
+}
+
+async function deleteReview(id) {
+  if (!confirm('Delete this review?')) return;
+  await sbDelete('reviews', id);
+  showNotice('Review deleted.');
+  loadReviews();
+}
+
+// ── MESSAGES ──
+async function loadMessages() {
+  const msgs = await sbGet('contact_submissions','?order=created_at.desc');
+  const tbody = document.getElementById('messagesTbody');
+  if (!msgs.length) { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">No messages yet.</td></tr>'; return; }
+  tbody.innerHTML = msgs.map(m=>`
+    <tr class="${m.is_read?'msg-read':''}">
+      <td><strong>${m.name}</strong></td>
+      <td><a href="mailto:${m.email}" style="color:var(--gold)">${m.email}</a></td>
+      <td style="max-width:280px;font-size:12px;">${m.message}</td>
+      <td style="white-space:nowrap;font-size:12px;">${new Date(m.created_at).toLocaleDateString()}</td>
+      <td>${!m.is_read?`<button class="btn btn-outline btn-sm" onclick="markRead('${m.id}',this)">Mark read</button>`:'<span style="color:var(--muted);font-size:12px">Read</span>'}</td>
+    </tr>`).join('');
+}
+
+async function markRead(id, btn) {
+  await sbPatch('contact_submissions', id, {is_read:true});
+  btn.closest('tr').classList.add('msg-read');
+  btn.outerHTML='<span style="color:var(--muted);font-size:12px">Read</span>';
+}
+</script>
+</body>
+</html>
