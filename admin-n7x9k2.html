@@ -105,6 +105,7 @@ select.input option{background:var(--card);}
       <div class="tab active" onclick="switchTab('projects')">Projects</div>
       <div class="tab" onclick="switchTab('reviews')">Reviews</div>
       <div class="tab" onclick="switchTab('messages')">Messages</div>
+      <div class="tab" onclick="switchTab('social')">Social Links</div>
     </div>
 
     <!-- PROJECTS TAB -->
@@ -204,6 +205,32 @@ select.input option{background:var(--card);}
         <tbody id="messagesTbody"><tr><td colspan="5" style="text-align:center;padding:32px;"><span class="spinner"></span> Loading...</td></tr></tbody>
       </table>
     </div>
+
+    <!-- SOCIAL LINKS TAB -->
+    <div class="tab-panel" id="tab-social">
+      <div class="section-head">
+        <h2 style="font-size:16px;font-weight:400;">Social Links</h2>
+        <button class="btn btn-gold btn-sm" onclick="showAddSocial()">+ Add Link</button>
+      </div>
+      <div class="panel-form" id="socialForm" style="display:none">
+        <h3 id="socialFormTitle">Add Social Link</h3>
+        <input type="hidden" id="sfId">
+        <div class="form-grid">
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Platform</label><input class="input" id="sfPlatform" placeholder="e.g. Instagram, Facebook, LinkedIn"></div>
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">URL</label><input class="input" id="sfUrl" placeholder="https://..."></div>
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Icon (optional label)</label><input class="input" id="sfIcon" placeholder="e.g. instagram"></div>
+          <div><label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Sort Order</label><input class="input" type="number" id="sfSort" placeholder="1" value="1"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button class="btn btn-gold" onclick="saveSocial()">Save Link</button>
+          <button class="btn btn-outline" onclick="document.getElementById('socialForm').style.display='none'">Cancel</button>
+        </div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Platform</th><th>URL</th><th>Sort</th><th>Actions</th></tr></thead>
+        <tbody id="socialTbody"><tr><td colspan="4" style="text-align:center;padding:32px;"><span class="spinner"></span> Loading...</td></tr></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -259,11 +286,11 @@ function showNotice(msg, ok=true) {
 
 // TABS
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['projects','reviews','messages'][i]===name));
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['projects','reviews','messages','social'][i]===name));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id==='tab-'+name));
   if (name==='messages') loadMessages();
+  if (name==='social') loadSocialLinks();
 }
-
 function loadAll() { loadProjects(); loadReviews(); }
 
 // ── PROJECTS ──
@@ -455,6 +482,64 @@ async function markRead(id, btn) {
   await sbPatch('contact_submissions', id, {is_read:true});
   btn.closest('tr').classList.add('msg-read');
   btn.outerHTML='<span style="color:var(--muted);font-size:12px">Read</span>';
+}
+
+// ── SOCIAL LINKS ──
+let editingSocialId = null;
+async function loadSocialLinks() {
+  const links = await sbGet('social_links','?order=sort_order.asc');
+  const tbody = document.getElementById('socialTbody');
+  if (!links.length) { tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted);">No links yet. Add one!</td></tr>'; return; }
+  tbody.innerHTML = links.map(s=>`
+    <tr>
+      <td><strong>${s.platform}</strong></td>
+      <td style="max-width:280px;word-break:break-all;font-size:12px;"><a href="${s.url}" target="_blank" style="color:var(--gold)">${s.url}</a></td>
+      <td>${s.sort_order}</td>
+      <td><div class="actions">
+        <button class="btn btn-outline btn-sm" onclick="editSocial('${s.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSocial('${s.id}')">Delete</button>
+      </div></td>
+    </tr>`).join('');
+}
+function showAddSocial() {
+  editingSocialId = null;
+  document.getElementById('socialFormTitle').textContent = 'Add Social Link';
+  document.getElementById('sfId').value=''; document.getElementById('sfPlatform').value='';
+  document.getElementById('sfUrl').value=''; document.getElementById('sfIcon').value='';
+  document.getElementById('sfSort').value='1';
+  document.getElementById('socialForm').style.display='block';
+  document.getElementById('socialForm').scrollIntoView({behavior:'smooth'});
+}
+async function editSocial(id) {
+  const links = await sbGet('social_links',`?id=eq.${id}`);
+  const s = links[0]; if (!s) return;
+  editingSocialId = id;
+  document.getElementById('socialFormTitle').textContent = 'Edit Social Link';
+  document.getElementById('sfId').value=s.id; document.getElementById('sfPlatform').value=s.platform||'';
+  document.getElementById('sfUrl').value=s.url||''; document.getElementById('sfIcon').value=s.icon||'';
+  document.getElementById('sfSort').value=s.sort_order||1;
+  document.getElementById('socialForm').style.display='block';
+  document.getElementById('socialForm').scrollIntoView({behavior:'smooth'});
+}
+async function saveSocial() {
+  const data = {
+    platform: document.getElementById('sfPlatform').value.trim(),
+    url: document.getElementById('sfUrl').value.trim(),
+    icon: document.getElementById('sfIcon').value.trim(),
+    sort_order: parseInt(document.getElementById('sfSort').value)||1
+  };
+  if (!data.platform||!data.url) { showNotice('Platform and URL are required.', false); return; }
+  if (editingSocialId) { await sbPatch('social_links', editingSocialId, data); }
+  else { await sbPost('social_links', data); }
+  showNotice('Social link saved!');
+  document.getElementById('socialForm').style.display='none';
+  loadSocialLinks();
+}
+async function deleteSocial(id) {
+  if (!confirm('Delete this link?')) return;
+  await sbDelete('social_links', id);
+  showNotice('Link deleted.');
+  loadSocialLinks();
 }
 </script>
 </body>
